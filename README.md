@@ -14,7 +14,7 @@ There are three files:
 
 ## Authors
 
-Annabel Smith and Jane Catford, except where indicated. 
+Annabel Smith and Jane Catford, except where indicated within the script. 
 
 ## Manuscript
 
