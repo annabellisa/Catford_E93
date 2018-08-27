@@ -6,17 +6,7 @@
 # Authors: Annabel Smith & Jane Catford
 
 # *** LOAD WORKSPACE:
-load("e93_wksp_all")
-
-# Remove everything except necessary items: (add new items when needed):
-nec_items<-c("coloniseSc","spreadSc","colabSc","col.unscaled","spr.unscaled","cab.unscaled","Comm_1_22_coef","step2.plot2")
-rm(list=setdiff(ls(), c(nec_items)))
-
-# Start fresh with updated data:
-load("e93_wksp_data")
-
-# Work on spread abundance:
-load("e93_wksp_sprab")
+load("e93_wksp_aug18")
 
 # load functions and libraries:
 source("/Users/annabelsmith/Documents/01_Current/PROJECTS/03_CATFORD_invasion_traits/DATA/AS_data_and_analysis/ANALYSIS_files/e93_script/e93_S0_function_library.R")
@@ -30,13 +20,6 @@ library(glmmADMB)
 library(piecewiseSEM)
 
 # We are using piecewiseSEM to calculate the r2m and r2c for all models. It is much quicker than the function in MuMIn which seems to refit the model before doing the calculation. I have checked both functions against hand-calculations and they agree. I have also checked them both using the examples in Johnson 2014 MEE which explains the situation specific to random slopes models and they give the same result.
-# Install piecewiseSEM from github
-# library(devtools)
-# install_github("jslefche/piecewiseSEM", build_vignette = TRUE)
-
-# this works for admb:
-# install.packages("R2admb",dependencies=T)
-# install.packages("glmmADMB",repos="http://glmmadmb.r-forge.r-project.org/repos")
 
 ######################################
 # 		   DATA EXPLANATIONS		 #
@@ -86,7 +69,7 @@ spr.mods2.allterms<-read.table(paste(mod.dir,"model_table_STEP2_spr.txt",sep="/"
 cab.mods2.allterms<-read.table(paste(mod.dir,"model_table_STEP2_colab.txt",sep="/"),header=T)
 sab.mods2.allterms<-read.table(paste(mod.dir,"model_table_STEP2_sprab.txt",sep="/"),header=T)
 
-# I tried to functionise this but, although this loop works, the function wasn't recognising when there were correlated terms. Update the following and run separately for each data set:
+# Update the following and run separately for each data set:
 model.table<-sab.mods2.allterms
 dataset<-sprabSc
 
@@ -289,7 +272,6 @@ null_mod<-glmer(formula=null_form,data=coloniseSc,family=binomial)
 summary(null_mod)
 
 null_BIC<-AIC(null_mod,k=log(length(levels(coloniseSc$plsub))))
-
 
 # Summarise results table:
 mod2_res<-mod2_meta[,c("model","trait.type","BIC","r2m","r2c")]
@@ -560,47 +542,7 @@ nd.s3
 # Convert nd.s3 into a plot table:
 step2.plot<-data.frame(data=nd.s3$df.name,x.label=c("NO3 soil","Relative FD SLA","Absolute FD height","Proportion perennial","Proportion Grass","Proportion Grass","Proportion Legume","Year","Year","Year","Year","Year"),x.variable=paste(nd.s3$xaxis.term,"_unsc",sep=""),interaction=nd.s3$interaction, x.subset=nd.s3$int.term,x1.label=c(rep(NA,3),"P","Grass=0","Legume=0","Legume=0","seed RelFD min","LDMC CWM min","P","Grass=0","Legume=0"),x2.label=c(rep(NA,3),"A","Grass=1","Legume=1","Legume=1","seed RelFD max","LDMC CWM max","A","Grass=1","Legume=1"))
 
-# TOP MODEL plots:
-quartz(title="",width=11.69,height=8.27, dpi=64, pointsize=16)
-par(mfrow=c(3,4),mar=c(4,4,1,1), pch=20, las=1, bty="l", mgp=c(2.5,1,0))
-
-for (i in 1:length(step2.plot[,1])){
-
-data.thisrun<-get(as.character(step2.plot$data[i]))
-plot.x<-data.thisrun[,as.character(step2.plot$x.variable[i])]
-plot.y<-data.thisrun[,"fit"]
-
-plot(plot.x, plot.y, type="n", ylab="Probability of colonisation", xlab="", ylim=c(0,1))
-title(xlab=as.character(step2.plot$x.label[i]),mgp=c(2.2,1,0))
-
-if (step2.plot$interaction[i]=="main"){
-pg.ci(as.character(step2.plot$x.variable[i]),as.character(step2.plot$data[i]),colour=rgb(0,0,0,0.1))
-lines(plot.x, plot.y)
-} # close if main
-
-if (step2.plot$interaction[i]=="int"){
-pg.ci(as.character(step2.plot$x.variable[i]),as.character(step2.plot$data[i]),x.subset=as.character(step2.plot$x.subset[i]),colour=rgb(0,0,0,0.1))
-
-sub1<-unique(data.thisrun[,as.character(step2.plot$x.subset[i])])[1]
-sub2<-unique(data.thisrun[,as.character(step2.plot$x.subset[i])])[2]
-
-linex.lev1<-data.thisrun[,as.character(step2.plot$x.variable[i])][data.thisrun[,as.character(step2.plot$x.subset[i])]==sub1]
-liney.lev1<-data.thisrun$fit[data.thisrun[,as.character(step2.plot$x.subset[i])]==sub1]
-
-lines(linex.lev1, liney.lev1, lty=1)
-
-linex.lev2<-data.thisrun[,as.character(step2.plot$x.variable[i])][data.thisrun[,as.character(step2.plot$x.subset[i])]==sub2]
-liney.lev2<-data.thisrun$fit[data.thisrun[,as.character(step2.plot$x.subset[i])]==sub2]
-
-lines(linex.lev2, liney.lev2, lty=2)
-
-par(xpd=NA)
-legend("topleft",legend=c(as.character(step2.plot$x1.label[i]),as.character(step2.plot$x2.label[i])),lty=c(1,2),bty="n")
-par(xpd=F)
-
-} # close if interaction
-
-} # close plot for
+# TOP MODEL plots (moved to separate sections below):
 
 } # close top model plots
 
@@ -971,117 +913,9 @@ spr2_res
 # The model to plot:
 summary(top.spread2)
 
-### ---- NEW DATA FOR ESTIMATES:
-{
+} # close estimates
 
-head(step2_topspr_coef)
-
-step2_topspr_coef$signif<-sign(step2_topspr_coef$lci.link)==sign(step2_topspr_coef$uci.link)
-
-# Reduce to significant terms:
-nd.spr2<-data.frame(term=step2_topspr_coef$term[step2_topspr_coef$signif==T])
-# Remove intercept
-nd.spr2<-data.frame(term=nd.spr2[-which(nd.spr2$term=="(Intercept)"),])
-# Add an interaction identifier:
-nd.spr2$interaction<-NA
-nd.spr2$interaction[grep(":",nd.spr2$term)]<-"int"
-nd.spr2$interaction[-grep(":",nd.spr2$term)]<-"main"
-nd.spr2<-tidy.df(nd.spr2)
-nd.spr2
-
-# Add an x.axis term column for the estimates.nd function:
-nd.spr2$xaxis.term<-c("sdsub_abund","grass","yr","yr","yr")
-
-# Add an interaction term column that will be used by the estimates.nd function:
-nd.spr2$int.term<-c(rep(NA,2),"sla_relFD","seed_relFD","ldmc_relFD")
-
-# For each term, add a name to be used as the data frame name:
-nd.spr2$df.name<-c("sdabund.topspr2","grass.topspr2","yrsla.topspr2","yrseed.topspr2","yrldmc.topspr2")
-
-# Get estimates with estimates.nd function for each data frame:
-for (i in 1:length(nd.spr2[,1])){
-
-if (nd.spr2$interaction[i]=="main"){
-assign(nd.spr2$df.name[i],estimates.nd("top.spread2",xaxis.term=nd.spr2$xaxis.term[i],modelled.data="spreadSc",unscaled.data="spr.unscaled"))
-} # close if main
-
-if (nd.spr2$interaction[i]=="int"){
-assign(nd.spr2$df.name[i],estimates.nd("top.spread2", xaxis.term=nd.spr2$xaxis.term[i],int.term=nd.spr2$int.term[i],modelled.data="spreadSc",unscaled.data="spr.unscaled"))
-} # close if interaction
-
-} # close for data frame loop
-
-} # close new data 
-
-} # close top model estimates
-
-## --- STEP 2 TOP MODEL PLOTS:
-{
-
-# Names for the estimate data frames are in nd.spr2$df.name:
-nd.spr2
-
-# Convert nd.spr2 into a plot table:
-step2spr.plot<-data.frame(data=nd.spr2$df.name,x.label=c("Seeded subplot abundance","Grass","Year","Year","Year"),x.variable=paste(nd.spr2$xaxis.term,"_unsc",sep=""),interaction=nd.spr2$interaction, x.subset=nd.spr2$int.term,x1.label=c(rep(NA,1),"Grass=0","SLA RelFD min","seed RelFD min","LDMC RelFD min"),x2.label=c(rep(NA,1),"Grass=1","SLA RelFD max","seed RelFD max","LDMC RelFD max"))
-
-# TOP MODEL plots:
-quartz(title="",width=10.69,height=7.27, dpi=80, pointsize=18)
-par(mfrow=c(2,3),mar=c(5,5,1,1), pch=20, las=1, bty="l", mgp=c(2.5,1,0))
-
-for (i in 1:length(step2spr.plot[,1])){
-
-data.thisrun<-get(as.character(step2spr.plot$data[i]))
-plot.x<-data.thisrun[,as.character(step2spr.plot$x.variable[i])]
-plot.y<-data.thisrun[,"fit"]
-
-if (length(plot.x)==2){
-
-plot(plot.x, plot.y, type="n", ylab="Probability of spread", xlab="", ylim=c(0,1), xaxt="n",xlim=c(-0.5,1.5))
-points(plot.x, plot.y)
-arrows(plot.x,data.thisrun$lci,plot.x,data.thisrun$uci, angle=90, code=3, length=0.05)
-axis(side=1, at=plot.x, labels=c(as.character(step2spr.plot$x1.label[i]),as.character(step2spr.plot$x2.label[i])))
-}
-
-if (length(plot.x)>2){
-
-plot(plot.x, plot.y, type="n", ylab="Probability of spread", xlab="", ylim=c(0,1))
-title(xlab=as.character(step2spr.plot$x.label[i]),mgp=c(2.2,1,0))
-
-if (step2spr.plot$interaction[i]=="main"){
-pg.ci(as.character(step2spr.plot$x.variable[i]),as.character(step2spr.plot$data[i]),colour=rgb(0,0,0,0.1))
-lines(plot.x, plot.y)
-} # close if main
-
-if (step2spr.plot$interaction[i]=="int"){
-pg.ci(as.character(step2spr.plot$x.variable[i]),as.character(step2spr.plot$data[i]),x.subset=as.character(step2spr.plot$x.subset[i]),colour=rgb(0,0,0,0.1))
-
-sub1<-unique(data.thisrun[,as.character(step2spr.plot$x.subset[i])])[1]
-sub2<-unique(data.thisrun[,as.character(step2spr.plot$x.subset[i])])[2]
-
-linex.lev1<-data.thisrun[,as.character(step2spr.plot$x.variable[i])][data.thisrun[,as.character(step2spr.plot$x.subset[i])]==sub1]
-liney.lev1<-data.thisrun$fit[data.thisrun[,as.character(step2spr.plot$x.subset[i])]==sub1]
-
-lines(linex.lev1, liney.lev1, lty=1)
-
-linex.lev2<-data.thisrun[,as.character(step2spr.plot$x.variable[i])][data.thisrun[,as.character(step2spr.plot$x.subset[i])]==sub2]
-liney.lev2<-data.thisrun$fit[data.thisrun[,as.character(step2spr.plot$x.subset[i])]==sub2]
-
-lines(linex.lev2, liney.lev2, lty=2)
-
-par(xpd=NA)
-legend("topleft",legend=c(as.character(step2spr.plot$x1.label[i]),as.character(step2spr.plot$x2.label[i])),lty=c(1,2),bty="n")
-par(xpd=F)
-
-} # close if interaction
-
-} # close if > 2 levels
-
-} # close plot for
-
-} # close top model plots
-
-### ---- STEP 2 TOP MODEL PLOTS P<0.06:
-### *** WARNING: some of the data frames (i.e. the assigned names for each term's new data) get overwritten in this section, so if plotting the main (P < 0.05) estimates, be sure to run the "TOP MODEL ESTIMATES" and "TOP MODEL PLOT" sections again.
+### ---- STEP 2 TOP MODEL PLOTS:
 {
 
 # NEW DATA ESTIMATES
@@ -1129,7 +963,7 @@ assign(nd.spr2b$df.name[i],estimates.nd("top.spread2", xaxis.term=nd.spr2b$xaxis
 
 } # close new data
 
-## --- STEP 2 TOP MODEL PLOTS  P<0.06:
+## --- STEP 2 TOP MODEL PLOTS:
 {
 
 # Names for the estimate data frames are in nd.spr2b$df.name:
@@ -1138,63 +972,11 @@ nd.spr2b
 # Convert nd.spr2b into a plot table:
 step2bspr.plot<-data.frame(data=nd.spr2b$df.name,x.label=c("Seeded subplot abundance","Absolute FD height","Grass","Year","Year","Year","Year"),x.variable=paste(nd.spr2b$xaxis.term,"_unsc",sep=""),interaction=nd.spr2b$interaction, x.subset=nd.spr2b$int.term,x1.label=c(rep(NA,2),"Grass=0","SLA RelFD min","seed RelFD min","LDMC RelFD min","Lifespan=P"),x2.label=c(rep(NA,2),"Grass=1","SLA RelFD max","seed RelFD max","LDMC RelFD max","Lifespan=A"))
 
-# TOP MODEL plots:
-quartz(title="",width=10.69,height=7.27, dpi=80, pointsize=18)
-par(mfrow=c(2,4),mar=c(4,4,1,1), pch=20, las=1, bty="l", mgp=c(2.5,1,0))
+# TOP MODEL plots (moved to separate section below):
 
-for (i in 1:length(step2bspr.plot[,1])){
+} # close top model plots
 
-data.thisrun<-get(as.character(step2bspr.plot$data[i]))
-plot.x<-data.thisrun[,as.character(step2bspr.plot$x.variable[i])]
-plot.y<-data.thisrun[,"fit"]
-
-if (length(plot.x)==2){
-
-plot(plot.x, plot.y, type="n", ylab="Probability of spread", xlab="", ylim=c(0,1), xaxt="n",xlim=c(-0.5,1.5))
-points(plot.x, plot.y)
-arrows(plot.x,data.thisrun$lci,plot.x,data.thisrun$uci, angle=90, code=3, length=0.05)
-axis(side=1, at=plot.x, labels=c(as.character(step2bspr.plot$x1.label[i]),as.character(step2bspr.plot$x2.label[i])))
-}
-
-if (length(plot.x)>2){
-
-plot(plot.x, plot.y, type="n", ylab="Probability of spread", xlab="", ylim=c(0,1))
-title(xlab=as.character(step2bspr.plot$x.label[i]),mgp=c(2.2,1,0))
-
-if (step2bspr.plot$interaction[i]=="main"){
-pg.ci(as.character(step2bspr.plot$x.variable[i]),as.character(step2bspr.plot$data[i]),colour=rgb(0,0,0,0.1))
-lines(plot.x, plot.y)
-} # close if main
-
-if (step2bspr.plot$interaction[i]=="int"){
-pg.ci(as.character(step2bspr.plot$x.variable[i]),as.character(step2bspr.plot$data[i]),x.subset=as.character(step2bspr.plot$x.subset[i]),colour=rgb(0,0,0,0.1))
-
-sub1<-unique(data.thisrun[,as.character(step2bspr.plot$x.subset[i])])[1]
-sub2<-unique(data.thisrun[,as.character(step2bspr.plot$x.subset[i])])[2]
-
-linex.lev1<-data.thisrun[,as.character(step2bspr.plot$x.variable[i])][data.thisrun[,as.character(step2bspr.plot$x.subset[i])]==sub1]
-liney.lev1<-data.thisrun$fit[data.thisrun[,as.character(step2bspr.plot$x.subset[i])]==sub1]
-
-lines(linex.lev1, liney.lev1, lty=1)
-
-linex.lev2<-data.thisrun[,as.character(step2bspr.plot$x.variable[i])][data.thisrun[,as.character(step2bspr.plot$x.subset[i])]==sub2]
-liney.lev2<-data.thisrun$fit[data.thisrun[,as.character(step2bspr.plot$x.subset[i])]==sub2]
-
-lines(linex.lev2, liney.lev2, lty=2)
-
-par(xpd=NA)
-legend("topleft",legend=c(as.character(step2bspr.plot$x1.label[i]),as.character(step2bspr.plot$x2.label[i])),lty=c(1,2),bty="n")
-par(xpd=F)
-
-} # close if interaction
-
-} # close if > 2 levels
-
-} # close plot for
-
-} # close top model plots P<0.06
-
-} # close plots P<0.06
+} # close plots
 
 } # close spread analysis
 
@@ -1229,7 +1011,7 @@ if (length(which(is.na(cab.mods1[,i])))==0) cab1_data$formula[i]<-paste("std_cov
 }
 
 # RUN MODELS in a loop and assign to model name in cab1_meta:
-######## 4.5 HOURS
+######## WARNING 4.5 HOURS
 cab1_meta$BIC<-NA
 # cab1_meta$r2m<-NA
 # cab1_meta$r2c<-NA
@@ -1436,142 +1218,7 @@ dev.off()
 
 } # close STEP 2 coefficients
 
-## --- STEP 2 TOP MODEL ESTIMATES:
-{
-# Modelled data:
-head(colabSc,2)
-# Unscaled data for plotting:
-head(cab.unscaled,2)
-
-# TOP MODEL coefficient table:
-step2_topcab_coef
-cab2_res
-
-# The model to plot:
-summary(top.cab2)
-
-### ---- NEW DATA FOR ESTIMATES:
-{
-
-head(step2_topcab_coef)
-
-step2_topcab_coef$signif<-sign(step2_topcab_coef$lci.link)==sign(step2_topcab_coef$uci.link)
-
-# Reduce to significant terms:
-nd.cab2<-data.frame(term=step2_topcab_coef$term[step2_topcab_coef$signif==T])
-# Remove intercept
-nd.cab2<-data.frame(term=nd.cab2[-which(nd.cab2$term=="(Intercept)"),])
-# Add an interaction identifier:
-nd.cab2$interaction<-NA
-if(length(grep(":",nd.cab2$term))>0) nd.cab2$interaction[grep(":",nd.cab2$term)]<-"int"
-if(length(grep(":",nd.cab2$term))>0) nd.cab2$interaction[-grep(":",nd.cab2$term)]<-"main"
-if(length(grep(":",nd.cab2$term))==0) nd.cab2$interaction<-"main"
-nd.cab2<-tidy.df(nd.cab2)
-
-# Add an x.axis term column for the estimates.nd function:
-nd.cab2$xaxis.term<-c("yr","prop_peren","prop_legume","hgt_gap","seed_cwm","ldmc_cwm")
-
-# For each term, add a name to be used as the data frame name:
-nd.cab2$df.name<-c("yr.topcab2","propperen.topcab2","propleg.topcab2","hgt.topcab2","seed.topcab2","ldmc.topcab2")
-
-# Get estimates with estimates.nd function for each data frame:
-for (i in 1:length(nd.cab2[,1])){
-
-if (nd.cab2$interaction[i]=="main"){
-assign(nd.cab2$df.name[i],estimates.nd("top.cab2",xaxis.term=nd.cab2$xaxis.term[i],modelled.data="colabSc",unscaled.data="cab.unscaled"))
-} # close if main
-
-} # close for data frame loop
-
-} # close new data 
-
-} # close top model estimates
-
-## --- STEP 2 TOP MODEL PLOTS:
-{
-
-# Names for the estimate data frames are in nd.cab2$df.name:
-nd.cab2
-
-# Convert nd.cab2 into a plot table:
-cab2.plot<-data.frame(data=nd.cab2$df.name,x.label=c("Year","Propn perennial","Propn legume","Height gap","Seed community wt mean","LDMC community wt mean"),x.variable=paste(nd.cab2$xaxis.term,"_unsc",sep=""),interaction=nd.cab2$interaction,x1.label=c(rep(NA,6)),x2.label=c(rep(NA,6)))
-
-# TOP MODEL plots:
-quartz(title="",width=12,height=6.5, dpi=64, pointsize=16)
-par(mfrow=c(2,3),mar=c(5,4.5,1,1), pch=20, las=1, bty="l", mgp=c(3,1,0))
-
-for (i in 1:length(cab2.plot[,1])){
-
-data.thisrun<-get(as.character(cab2.plot$data[i]))
-plot.x<-data.thisrun[,as.character(cab2.plot$x.variable[i])]
-if(length(grep(".resp",colnames(data.thisrun)))>0) plot.y<-data.thisrun[,"fit.resp"] else plot.y<-data.thisrun[,"fit"]
-if(length(grep(".resp",colnames(data.thisrun)))>0) lci.thisrun<-data.thisrun[,"lci.resp"] else lci.thisrun<-data.thisrun[,"lci"]
-if(length(grep(".resp",colnames(data.thisrun)))>0) uci.thisrun<-data.thisrun[,"uci.resp"] else uci.thisrun<-data.thisrun[,"uci"]
-
-if (length(plot.x)==2){
-
-if(is.factor(plot.x)==T){
-plot(c(0,1), plot.y, type="n", ylab="Proportion cover", xlab="", ylim=c(min(lci.thisrun),max(uci.thisrun)), xaxt="n",xlim=c(-0.5,1.5))
-points(c(0,1), plot.y)
-arrows(c(0,1),lci.thisrun,c(0,1),uci.thisrun, angle=90, code=3, length=0.05)
-par(xpd=NA)
-axis(side=1, at=c(0,1), labels=c(as.character(cab2.plot$x1.label[i]),as.character(cab2.plot$x2.label[i])))
-par(xpd=F)
-} # close if factor
-
-if(is.factor(plot.x)==F){
-plot(plot.x, plot.y, type="n", ylab="Proportion cover", xlab="", ylim=c(min(lci.thisrun),max(uci.thisrun)), xaxt="n",xlim=c(-0.5,1.5))
-points(plot.x, plot.y)
-arrows(plot.x,lci.thisrun,plot.x,uci.thisrun, angle=90, code=3, length=0.05)
-par(xpd=NA)
-axis(side=1, at=plot.x, labels=c(as.character(cab2.plot$x1.label[i]),as.character(cab2.plot$x2.label[i])))
-par(xpd=F)
-} # close if not factor
-
-} # close if length 2
-
-if (length(plot.x)>2){
-
-plot(plot.x, plot.y, type="n", ylab="Proportion cover", xlab="", ylim=c(min(lci.thisrun),max(uci.thisrun)))
-par(xpd=NA)
-title(xlab=as.character(cab2.plot$x.label[i]),mgp=c(2.2,1,0))
-par(xpd=F)
-
-if (cab2.plot$interaction[i]=="main"){
-pg.ci(as.character(cab2.plot$x.variable[i]),as.character(cab2.plot$data[i]),colour=rgb(0,0,0,0.1))
-lines(plot.x, plot.y)
-} # close if main
-
-if (cab2.plot$interaction[i]=="int"){
-pg.ci(as.character(cab2.plot$x.variable[i]),as.character(cab2.plot$data[i]),x.subset=as.character(cab2.plot$x.subset[i]),colour=rgb(0,0,0,0.1))
-
-sub1<-unique(data.thisrun[,as.character(cab2.plot$x.subset[i])])[1]
-sub2<-unique(data.thisrun[,as.character(cab2.plot$x.subset[i])])[2]
-
-linex.lev1<-data.thisrun[,as.character(cab2.plot$x.variable[i])][data.thisrun[,as.character(cab2.plot$x.subset[i])]==sub1]
-liney.lev1<-data.thisrun$fit[data.thisrun[,as.character(cab2.plot$x.subset[i])]==sub1]
-
-lines(linex.lev1, liney.lev1, lty=1)
-
-linex.lev2<-data.thisrun[,as.character(cab2.plot$x.variable[i])][data.thisrun[,as.character(cab2.plot$x.subset[i])]==sub2]
-liney.lev2<-data.thisrun$fit[data.thisrun[,as.character(cab2.plot$x.subset[i])]==sub2]
-
-lines(linex.lev2, liney.lev2, lty=2)
-
-par(xpd=NA)
-legend("topleft",legend=c(as.character(cab2.plot$x1.label[i]),as.character(cab2.plot$x2.label[i])),lty=c(1,2),bty="n")
-par(xpd=F)
-
-} # close if interaction
-
-} # close if > 2 levels
-
-} # close plot for
-
-} # close top model plots
-
-### ---- STEP 2 TOP MODEL PLOTS P<0.06:
-### *** WARNING: some of the data frames (i.e. the assigned names for each term's new data) get overwritten in this section, so if plotting the main (P < 0.05) estimates, be sure to run the "TOP MODEL ESTIMATES" and "TOP MODEL PLOT" sections again.
+### ---- STEP 2 TOP MODEL PLOTS:
 {
 
 # NEW DATA ESTIMATES
@@ -1611,7 +1258,7 @@ assign(nd.cab2b$df.name[i],estimates.nd("top.cab2",xaxis.term=nd.cab2b$xaxis.ter
 
 } # close new data 
 
-## --- STEP 2 TOP MODEL PLOTS  P<0.06:
+## --- STEP 2 TOP MODEL PLOTS:
 {
 
 # Names for the estimate data frames are in nd.cab2b$df.name:
@@ -1620,81 +1267,11 @@ nd.cab2b
 # Convert nd.cab2b into a plot table:
 cab2b.plot<-data.frame(data=nd.cab2b$df.name,x.label=c("Year","NO3 soil","Propn perennial","Propn legume","Height gap","Seed community wt mean","LDMC community wt mean"),x.variable=paste(nd.cab2b$xaxis.term,"_unsc",sep=""),interaction=nd.cab2b$interaction,x1.label=c(rep(NA,7)),x2.label=c(rep(NA,7)))
 
-# TOP MODEL plots:
-quartz(title="",width=12,height=6.5, dpi=64, pointsize=16)
-par(mfrow=c(2,4),mar=c(5,4.5,1,1), pch=20, las=1, bty="l", mgp=c(3,1,0))
+# TOP MODEL plots (moved to separate section below):
 
-for (i in 1:length(cab2b.plot[,1])){
+} # close top model plots
 
-data.thisrun<-get(as.character(cab2b.plot$data[i]))
-plot.x<-data.thisrun[,as.character(cab2b.plot$x.variable[i])]
-if(length(grep(".resp",colnames(data.thisrun)))>0) plot.y<-data.thisrun[,"fit.resp"] else plot.y<-data.thisrun[,"fit"]
-if(length(grep(".resp",colnames(data.thisrun)))>0) lci.thisrun<-data.thisrun[,"lci.resp"] else lci.thisrun<-data.thisrun[,"lci"]
-if(length(grep(".resp",colnames(data.thisrun)))>0) uci.thisrun<-data.thisrun[,"uci.resp"] else uci.thisrun<-data.thisrun[,"uci"]
-
-if (length(plot.x)==2){
-
-if(is.factor(plot.x)==T){
-plot(c(0,1), plot.y, type="n", ylab="Proportion cover", xlab="", ylim=c(min(lci.thisrun),max(uci.thisrun)), xaxt="n",xlim=c(-0.5,1.5))
-points(c(0,1), plot.y)
-arrows(c(0,1),lci.thisrun,c(0,1),uci.thisrun, angle=90, code=3, length=0.05)
-par(xpd=NA)
-axis(side=1, at=c(0,1), labels=c(as.character(cab2b.plot$x1.label[i]),as.character(cab2b.plot$x2.label[i])))
-par(xpd=F)
-} # close if factor
-
-if(is.factor(plot.x)==F){
-plot(plot.x, plot.y, type="n", ylab="Proportion cover", xlab="", ylim=c(min(lci.thisrun),max(uci.thisrun)), xaxt="n",xlim=c(-0.5,1.5))
-points(plot.x, plot.y)
-arrows(plot.x,lci.thisrun,plot.x,uci.thisrun, angle=90, code=3, length=0.05)
-par(xpd=NA)
-axis(side=1, at=plot.x, labels=c(as.character(cab2b.plot$x1.label[i]),as.character(cab2b.plot$x2.label[i])))
-par(xpd=F)
-} # close if not factor
-
-} # close if length 2
-
-if (length(plot.x)>2){
-
-plot(plot.x, plot.y, type="n", ylab="Proportion cover", xlab="", ylim=c(min(lci.thisrun),max(uci.thisrun)))
-par(xpd=NA)
-title(xlab=as.character(cab2b.plot$x.label[i]),mgp=c(2.2,1,0))
-par(xpd=F)
-
-if (cab2b.plot$interaction[i]=="main"){
-pg.ci(as.character(cab2b.plot$x.variable[i]),as.character(cab2b.plot$data[i]),colour=rgb(0,0,0,0.1))
-lines(plot.x, plot.y)
-} # close if main
-
-if (cab2b.plot$interaction[i]=="int"){
-pg.ci(as.character(cab2b.plot$x.variable[i]),as.character(cab2b.plot$data[i]),x.subset=as.character(cab2b.plot$x.subset[i]),colour=rgb(0,0,0,0.1))
-
-sub1<-unique(data.thisrun[,as.character(cab2b.plot$x.subset[i])])[1]
-sub2<-unique(data.thisrun[,as.character(cab2b.plot$x.subset[i])])[2]
-
-linex.lev1<-data.thisrun[,as.character(cab2b.plot$x.variable[i])][data.thisrun[,as.character(cab2b.plot$x.subset[i])]==sub1]
-liney.lev1<-data.thisrun$fit[data.thisrun[,as.character(cab2b.plot$x.subset[i])]==sub1]
-
-lines(linex.lev1, liney.lev1, lty=1)
-
-linex.lev2<-data.thisrun[,as.character(cab2b.plot$x.variable[i])][data.thisrun[,as.character(cab2b.plot$x.subset[i])]==sub2]
-liney.lev2<-data.thisrun$fit[data.thisrun[,as.character(cab2b.plot$x.subset[i])]==sub2]
-
-lines(linex.lev2, liney.lev2, lty=2)
-
-par(xpd=NA)
-legend("topleft",legend=c(as.character(cab2b.plot$x1.label[i]),as.character(cab2b.plot$x2.label[i])),lty=c(1,2),bty="n")
-par(xpd=F)
-
-} # close if interaction
-
-} # close if > 2 levels
-
-} # close plot for
-
-} # close top model plots P<0.06
-
-} # close plots P<0.06
+} # close plots 
 
 } # close col abund analysis
 
@@ -1702,7 +1279,7 @@ par(xpd=F)
 {
 # spread abundance followed the same rules as spread probability, e.g. the species had to have been previously present for it to be coded as spread, etc. (see details in data set-up script)
 
-# Make NAs zero because the data frame includes all species that were seeded in that plot (and not present in 1991) that haven't spread (spread=0) 
+# Make NAs zero because the data frame includes all species that were seeded in that plot (and not present in 1991) that haven't spread (spread=0). Not sure what this step was for - there are no NAs in the spread data. 
 sprabSc<-spreadSc
 sab.unscaled<-spr.unscaled
 sprabSc$spr_abund_raw[which(is.na(sprabSc$spr_abund_raw))]<-0
@@ -2026,152 +1603,17 @@ step2sab.plot<-data.frame(data=nd.sab2$df.name,x.label=c("Year","Seeded subplot 
 step2sab.plot<-step2sab.plot[-which(step2sab.plot$data %in% c("hgtgap.topsab2","propleg.topsab2")),]
 step2sab.plot<-tidy.df(step2sab.plot)
 
-quartz(title="",width=(11.69/4)*3,height=(8.27/3)*2, dpi=64, pointsize=19)
-par(mfrow=c(2,3),mar=c(4,4,1.5,1), pch=20, las=1, bty="l", mgp=c(2.7,1,0),oma=c(0,0,1,0))
-
-for (i in 1:length(step2sab.plot[,1])){
-
-data.thisrun<-get(as.character(step2sab.plot$data[i]))
-plot.x<-data.thisrun[,as.character(step2sab.plot$x.variable[i])]
-if(length(grep(".resp",colnames(data.thisrun)))>0) plot.y<-data.thisrun[,"fit.resp"] else plot.y<-data.thisrun[,"fit"]
-if(length(grep(".resp",colnames(data.thisrun)))>0) lci.thisrun<-data.thisrun[,"lci.resp"] else lci.thisrun<-data.thisrun[,"lci"]
-if(length(grep(".resp",colnames(data.thisrun)))>0) uci.thisrun<-data.thisrun[,"uci.resp"] else uci.thisrun<-data.thisrun[,"uci"]
-
-y.limx<-1
-
-if (length(plot.x)==2){
-
-plot(plot.x, plot.y, type="n", ylab="Invader cover", xlab="", ylim=c(0,0.2), xaxt="n",xlim=c(-0.5,1.5))
-points(plot.x, plot.y)
-arrows(plot.x,data.thisrun$lci,plot.x,data.thisrun$uci, angle=90, code=3, length=0.05)
-axis(side=1, at=plot.x, labels=c(as.character(step2sab.plot$x1.label[i]),as.character(step2sab.plot$x2.label[i])))
-}
-
-if (length(plot.x)>2){
-
-plot(plot.x, plot.y, type="n", ylab="Invader cover", xlab="", ylim=c(0,0.2))
-title(xlab=as.character(step2sab.plot$x.label[i]),mgp=c(2.2,1,0))
-
-if (step2sab.plot$interaction[i]=="main"){
-pg.ci(as.character(step2sab.plot$x.variable[i]),as.character(step2sab.plot$data[i]),colour=rgb(0,0,0,0.1))
-lines(plot.x, plot.y)
-} # close if main
-
-if (step2sab.plot$interaction[i]=="int"){
-pg.ci(as.character(step2sab.plot$x.variable[i]),as.character(step2sab.plot$data[i]),x.subset=as.character(step2sab.plot$x.subset[i]),colour=rgb(0,0,0,0.1))
-
-sub1<-unique(data.thisrun[,as.character(step2sab.plot$x.subset[i])])[1]
-sub2<-unique(data.thisrun[,as.character(step2sab.plot$x.subset[i])])[2]
-
-linex.lev1<-data.thisrun[,as.character(step2sab.plot$x.variable[i])][data.thisrun[,as.character(step2sab.plot$x.subset[i])]==sub1]
-liney.lev1<-data.thisrun$fit.resp[data.thisrun[,as.character(step2sab.plot$x.subset[i])]==sub1]
-
-lines(linex.lev1, liney.lev1, lty=1)
-
-linex.lev2<-data.thisrun[,as.character(step2sab.plot$x.variable[i])][data.thisrun[,as.character(step2sab.plot$x.subset[i])]==sub2]
-liney.lev2<-data.thisrun$fit.resp[data.thisrun[,as.character(step2sab.plot$x.subset[i])]==sub2]
-
-lines(linex.lev2, liney.lev2, lty=2)
-
-par(xpd=NA)
-legend(par("usr")[1],0.22,legend=c(as.character(step2sab.plot$x1.label[i]),as.character(step2sab.plot$x2.label[i])),lty=c(1,2),bty="n",cex=0.8)
-par(xpd=F)
-
-} # close if interaction
-
-} # close if > 2 levels
-
-par(xpd=NA)
-text(par("usr")[1],par("usr")[4]+0.03,paste("(",letters[i],")",sep=""),cex=1.2)
-par(xpd=F)
-
-} # close plot for
-
-
+# plots moved to separate section below
 
 } # close top model plots
 
-# Why is prop perennial predicting outside the range in the data on invader cover?
-
-
-formula(top.cab2)
-formula(top.sab2)
-
-tc<-glmmadmb(std_cover ~ yr + no_seeded + moisture + NO3soil + prop_peren +     prop_grass + prop_legume + sla_absFD + hgt_gap + seed_cwm +   ldmc_cwm + (1 + NO3soil | sp) + (1 | plot/plsub), data=colabSc, family="beta")
-ts<-glmmadmb(std_cover ~ yr + sdsub_abund + sla_cwm + hgt_gap + seed_raw + ldmc_raw + prop_peren + prop_legume + sla_cwm:yr + hgt_gap:yr +     seed_raw:yr + ldmc_raw:yr + prop_peren:yr + prop_legume:yr +     (1 | sp) + (1 | plot), data=sprabSc, family="beta")
-summary(ts)
-
-save.image("e93_wksp_sprab")
-
-nd.cab2
-nd.sab2
-
-pperen<-estimates.nd("ts", xaxis.term="yr",int.term="prop_peren",modelled.data="sprabSc",unscaled.data="sab.unscaled")
-
-head(pperen)
-
-ppp2<-estimates.nd.V2("ts", xaxis.term="yr",int.term="prop_peren",modelled.data="sprabSc",unscaled.data="sab.unscaled",minmax=F)
-head(ppp2)
-
-
-# Plot histograms for all numeric x numeric interactions:
-
-# col prob = seed relFD x yr, LDMC cwm x yr 
-# spr prob = sla relFD x yr, seed relFD x yr, LDMC relFD x yr
-# colab = none
-# sprab = sla cwm x yr, hgt gap x yr, prop peren x yr, prop leg x yr
-
-quartz("",8,6)
-par(mfrow=c(3,4))
-hist(col.unscaled$seed_relFD,main="colonisation probability",font.main=1)
-hist(col.unscaled$ldmc_cwm,main="colonisation probability",font.main=1)
-plot.new(); plot.new()
-hist(spr.unscaled$sla_relFD,main="spread probability",font.main=1)
-hist(spr.unscaled$seed_relFD,main="spread probability",font.main=1)
-hist(spr.unscaled$ldmc_relFD,main="spread probability",font.main=1)
-plot.new()
-hist(sab.unscaled$sla_cwm,main="spread abundance",font.main=1)
-hist(sab.unscaled$hgt_gap,main="spread abundance",font.main=1)
-hist(sab.unscaled$prop_peren,main="spread abundance",font.main=1)
-hist(sab.unscaled$prop_leg,main="spread abundance",font.main=1)
-
-
-
-quartz("",8,4)
-par(mfrow=c(1,2))
-summary(sprabSc$prop_peren)
-hist(sprabSc$prop_peren,main="scaled data")
-hist(sab.unscaled$prop_peren,main="unscaled data")
-
-
-ppnd2<-pperen[,1:8]
-head(ppnd2)
-
-ppnd2$prop_peren[which(ppnd2$prop_peren==min(ppnd2$prop_peren))]<-as.numeric(summary(sprabSc$prop_peren)[2])
-
-perenpred<-pred(ts,ppnd2,se.fit=T,type="response")
-head(perenpred)
-range(perenpred$fit.resp)
-
-plot(perenpred$yr[perenpred$prop_peren==min(perenpred$prop_peren)],perenpred$fit.resp[perenpred$prop_peren==min(perenpred$prop_peren)],type="l",lty=1,ylim=c(0,0.5), xlab="year",ylab="predicted cover")
-lines(perenpred$yr[perenpred$prop_peren==max(perenpred$prop_peren)],perenpred$fit.resp[perenpred$prop_peren==max(perenpred$prop_peren)],lty=2)
-legend("topleft",legend=c("min","max"),lty=c(1,2))
-
-head(sprabSc,3)
-
-sprabSc[which(sprabSc$prop_peren==max(sprabSc$prop_peren)),1:7]
-
-plot(sab.unscaled$std_cover, sab.unscaled$prop_peren,col=sab.unscaled$yr+1,pch=20)
-legend(0.4,0.93,col=unique(sab.unscaled$yr+1),legend=as.character(unique(sab.unscaled$yr+1)),pch=20,title="Year")
-
 } # close spread abundance
 
-
 ## ~~~~ ---- ** COEF PLOTS ** ---- ~~~~ ##
-# plot multiple competing models on the same effect size plot, for SI
+# Plot multiple competing models on the same effect size plot, for SI
 {
 
-# Individual plots:
+# Set up tables for each response separately:
 {
 # MODEL OUTPUTS are stored in step3_res$model, plus "_mod" (e.g. comb_6_mod). Add rank to model results table:
 # Coef tables are stored in spr2_res$model, plus "_coef" (e.g. Model1_13). 
@@ -2190,13 +1632,10 @@ Comm_1_22_coef
 sab2_res # spread abundance step 2
 sab_BIC5<-sab2_res[which(abs(sab2_res$BIC[1]-sab2_res$BIC)<5),]
 
-
 colprob_BIC5
 spread_BIC5
 colab_BIC5
 sab_BIC5
-
-
 
 # COLONISATION PROB. top models coef plot:
 
@@ -2224,33 +1663,6 @@ coefall_colpr$index<-1:nrow(coefall_colpr)
 # Manually add labels
 coefall_colpr$label<-c("Intercept","Year","Number seeded","Moisture","Soil NO3","Proportion perennial","Proportion grass","Proportion legume","Lifespan","Grass","Legume","Height absolute FD","LDMC community wt. mean","Seed relative FD","SLA relative FD","Proportion perennial x lifespan","Proportion grass x grass","Proportion grass x legume","Proportion legume x grass","Proportion legume x legume","Year x lifespan","Year x grass","Year x legume","Year x height absolute FD","Year x LDMC community wt. mean","Year x seed relative FD","Year x SLA relative FD")
 
-quartz("",9,12,pointsize=16,dpi=60)
-
-yoffset=0
-yoffsetinc=0.18
-nm=length(b)
-ylaboffset=(yoffsetinc/2)*(nm-1)
-greyoffset<-1
-greyinc<-0.2
-
-par(mar=c(4,12,2,1), mgp=c(2.6,1,0))
-plot(1:length(yaxislab),1:length(yaxislab),type="n",xlim=c(min(df1$lci.link),max(df1$uci.link)), xlab="Effect size", ylab="", yaxt="n", bty="l", main=expression(paste("Probability of colonisation ",Delta," BIC < 5",sep="")), cex.main=1, font.main=1)
-axis(side=2, at=(1:length(coefall[,1]))-ylaboffset, labels=rev(as.character(coefall$label)),las=1, cex.axis=0.8)
-arrows(0,-1,0,50,code=0)
-
-for (i in 1:length(b)){
-  coefthisrun=get(b[i])
-  coefmerge=merge(coefall,coefthisrun,all.x=T,all.y=FALSE)
-  coefmerge=coefmerge[order(coefmerge$index),]
-  if(i>1) yoffset=yoffset+yoffsetinc
-   if(i>1) greyoffset=greyoffset-greyinc
-points(rev(coefmerge$est),(1:nrow(coefmerge)-yoffset),pch=20,col=rgb(0,0,0,greyoffset),cex=1) 
-  arrows(rev(coefmerge$lci.link),(1:length(coefmerge[,1])-yoffset),rev(coefmerge$uci.link),(1:length(coefmerge[,1])-yoffset),code=0)
-}
-
-legend(1,2,legend=paste("Model ",seq(1),sep=""),bty="n",pch=20,col=c(rgb(0,0,0,1)))
-
-
 # SPREAD top models coef plot:
 
 df_sprpr<-do.call(rbind,lapply(paste(spread_BIC5$model,"_coef",sep=""),get))
@@ -2273,34 +1685,6 @@ coefall_sprpr$index<-1:nrow(coefall_sprpr)
 
 # Manually add labels
 coefall_sprpr$label<-c("Intercept","Year","Seeded subplot abundance","Lifespan","Grass","Legume","Height absolute FD","LDMC community wt. mean","LDMC raw","LDMC relative FD","Seed relative FD","SLA raw","SLA relative FD","Year x lifespan","Year x grass","Year x legume","Year x height absolute FD","Year x LDMC community wt. mean","Year x LDMC raw","Year x LDMC relative FD","Year x seed relative FD","Year x SLA raw","Year x SLA relative FD")
-
-quartz("",9,12,pointsize=16,dpi=60)
-
-yoffset=0
-yoffsetinc=0.18
-nm=length(b)
-ylaboffset=(yoffsetinc/2)*(nm-1)
-greyoffset<-1
-greyinc<-0.2
-
-par(mar=c(4,12,2,1), mgp=c(2.6,1,0))
-plot(1:length(yaxislab),1:length(yaxislab),type="n",xlim=c(min(df1$lci.link),max(df1$uci.link)), ylim=c(0,nrow(coefall)), xlab="Effect size", ylab="", yaxt="n", bty="l", main=expression(paste("Probability of spread ",Delta," BIC < 5",sep="")), cex.main=1, font.main=1)
-axis(side=2, at=(1:length(coefall[,1]))-ylaboffset, labels=rev(as.character(coefall$label)),las=1, cex.axis=0.8)
-arrows(0,-1,0,50,code=0)
-
-for (i in 1:length(b)){
-  coefthisrun=get(b[i])
-  coefmerge=merge(coefall,coefthisrun,all.x=T,all.y=FALSE)
-  coefmerge=coefmerge[order(coefmerge$index),]
-  if(i>1) yoffset=yoffset+yoffsetinc
-   if(i>1) greyoffset=greyoffset-greyinc
-points(rev(coefmerge$est),(1:nrow(coefmerge)-yoffset),pch=20,col=rgb(0,0,0,greyoffset),cex=1) 
-  arrows(rev(coefmerge$lci.link),(1:length(coefmerge[,1])-yoffset),rev(coefmerge$uci.link),(1:length(coefmerge[,1])-yoffset),code=0)
-}
-
-legend(1,4,legend=paste("Model ",seq(1,5),sep=""),bty="n",pch=20,col=c(rgb(0,0,0,1),rgb(0,0,0,0.8),rgb(0,0,0,0.6),rgb(0,0,0,0.5),rgb(0,0,0,0.4)))
-
-
 
 # COLONISATION ABUND. top models coef plot:
 
@@ -2328,33 +1712,6 @@ coefall_colab$index<-1:nrow(coefall_colab)
 # Manually add labels
 coefall_colab$label<-c("Intercept","Year","Number seeded","Moisture","Soil NO3","Proportion perennial","Proportion grass","Proportion legume","Height gap","LDMC community wt. mean","LDMC gap","LDMC raw","LDMC relative FD","Seed community wt. mean","SLA absolute FD","SLA relative FD")
 
-quartz("",9,12,pointsize=16,dpi=60)
-
-yoffset=0
-yoffsetinc=0.1
-nm=length(b)
-ylaboffset=(yoffsetinc/2)*(nm-1)
-greyoffset<-1
-greyinc<-0.1
-
-par(mar=c(4,12,2,1), mgp=c(2.6,1,0))
-plot(1:length(yaxislab),1:length(yaxislab),type="n",xlim=c(min(df1$lci.link),max(df1$uci.link)), ylim=c(0,nrow(coefall)), xlab="Effect size", ylab="", yaxt="n", bty="l", main=expression(paste("Colonisation abundance ",Delta," BIC < 5",sep="")), cex.main=1, font.main=1)
-axis(side=2, at=(1:length(coefall[,1]))-ylaboffset, labels=rev(as.character(coefall$label)),las=1, cex.axis=0.8)
-arrows(0,-1,0,50,code=0)
-
-for (i in 1:length(b)){
-  coefthisrun=get(b[i])
-  coefmerge=merge(coefall,coefthisrun,all.x=T,all.y=FALSE)
-  coefmerge=coefmerge[order(coefmerge$index),]
-  if(i>1) yoffset=yoffset+yoffsetinc
-   if(i>1) greyoffset=greyoffset-greyinc
-points(rev(coefmerge$est),(1:nrow(coefmerge)-yoffset),pch=20,col=rgb(0,0,0,greyoffset),cex=1) 
-  arrows(rev(coefmerge$lci.link),(1:length(coefmerge[,1])-yoffset),rev(coefmerge$uci.link),(1:length(coefmerge[,1])-yoffset),code=0)
-}
-
-legend(-3,4,legend=paste("Model ",seq(1,8),sep=""),bty="n",pch=20,col=c(rgb(0,0,0,seq(1,0.2,length.out=8))))
-
-
 # SPREAD ABUND. top models coef plot:
 
 df_sprab<-do.call(rbind,lapply(paste(sab_BIC5$model,"_coef",sep=""),get))
@@ -2381,33 +1738,7 @@ coefall_sprab$index<-1:nrow(coefall_sprab)
 # Manually add labels
 coefall_sprab$label<-c("Intercept","Year","Seeded subplot abundance","Proportion perennial","Proportion legume","Height gap","LDMC raw","Seed absolute FD","Seed raw","Seed relative FD","SLA community wt. mean","Year x proportion perennial","Year x proportion legume","Year x height gap","Year x LDMC raw","Year x seed absolute FD","Year x seed raw","Year x seed relative FD","Year x SLA community wt. mean")
 
-quartz("",9,12,pointsize=16,dpi=60)
-
-yoffset=0
-yoffsetinc=0.18
-nm=length(b)
-ylaboffset=(yoffsetinc/2)*(nm-1)
-greyoffset<-1
-greyinc<-0.4
-
-par(mar=c(4,12,2,1), mgp=c(2.6,1,0))
-plot(1:length(yaxislab),1:length(yaxislab),type="n",xlim=c(min(df1$lci.link),max(df1$uci.link)), ylim=c(0,nrow(coefall)), xlab="Effect size", ylab="", yaxt="n", bty="l", main=expression(paste("Spread abundance ",Delta," BIC < 5",sep="")), cex.main=1, font.main=1)
-axis(side=2, at=(1:length(coefall[,1]))-ylaboffset, labels=rev(as.character(coefall$label)),las=1, cex.axis=0.8)
-arrows(0,-1,0,50,code=0)
-
-for (i in 1:length(b)){
-  coefthisrun=get(b[i])
-  coefmerge=merge(coefall,coefthisrun,all.x=T,all.y=FALSE)
-  coefmerge=coefmerge[order(coefmerge$index),]
-  if(i>1) yoffset=yoffset+yoffsetinc
-   if(i>1) greyoffset=greyoffset-greyinc
-points(rev(coefmerge$est),(1:nrow(coefmerge)-yoffset),pch=20,col=rgb(0,0,0,greyoffset),cex=1) 
-  arrows(rev(coefmerge$lci.link),(1:length(coefmerge[,1])-yoffset),rev(coefmerge$uci.link),(1:length(coefmerge[,1])-yoffset),code=0)
-}
-
-legend(-3,4,legend=paste("Model ",seq(1,length(b)),sep=""),bty="n",pch=20,col=c(rgb(0,0,0,seq(1,greyinc,length.out=length(b)))))
-
-} # close individual
+} # close tables
 
 # Put them together:
 
@@ -2418,7 +1749,7 @@ coefall_sprab; b_sprab
 
 coefdf<-c("coefall_colpr","coefall_colab","coefall_sprpr","coefall_sprab")
 bs<-c("b_colpr","b_colab","b_sprpr","b_sprab")
-labs<-c("Colonisation probability","Colonisation abundance","Spread probability","Spread abundance")
+labs<-c("Establishment occupancy","Establishment abundance","Spread occupancy","Spread abundance")
 dfs<-c("df_colpr","df_colab","df_sprpr","df_sprab")
 
 # width for a4: 8.27
@@ -2428,7 +1759,7 @@ par(mfrow=c(2,2),mar=c(6,14,2,1), mgp=c(2.6,1,0),oma=c(0,0,0,0))
 
 yincs=c(0.2,0.12,0.2,0.2)
 greyincs=c(0.2,0.1,0.2,0.2)
-legx<-c(-100,-3,0,-4)
+legx<-c(-100,-3.2,0.5,-4)
 
 for (j in 1:length(bs)){
 
@@ -2458,25 +1789,15 @@ points(rev(coefmerge$est),(1:nrow(coefmerge)-yoffset),pch=20,col=i,cex=1)
   arrows(rev(coefmerge$lci.link),(1:length(coefmerge[,1])-yoffset),rev(coefmerge$uci.link),(1:length(coefmerge[,1])-yoffset),code=0)
 }
 par(xpd=NA)
-legend(legx[j],6,legend=paste("Rank ",seq(1,length(bs.thirun))," ", bs.thirun[i],sep=""),bty="n",pch=20,col=seq(1,length(bs.thirun),length.out=length(bs.thirun)),cex=0.8)
+legend(legx[j],6,legend=paste("Rank ",seq(1,length(bs.thirun))," ", bs.thirun,sep=""),bty="n",pch=20,col=seq(1,length(bs.thirun),length.out=length(bs.thirun)),cex=0.8)
 par(xpd=F)
 
 } # close j models
 
-
-
-
-
-
-
-
-
-
-
 } # close coef plots
 
 ## ~~~ -- ** PLOTS FOR PAPER ** -- ~~~ ##
-## ~~~~ ---- ** MAR 2018 ** ---- ~~~~ ##
+## ~~~~ ---- ** AUG 2018 ** ---- ~~~~ ##
 {
 # COLONISATION PROBABILITY:
 
@@ -2491,7 +1812,7 @@ data.thisrun<-get(as.character(step2.plot2$data[i]))
 plot.x<-data.thisrun[,as.character(step2.plot2$x.variable[i])]
 plot.y<-data.thisrun[,"fit"]
 
-plot(plot.x, plot.y, type="n", ylab="Colonisation probability", xlab="", ylim=c(0,1))
+plot(plot.x, plot.y, type="n", ylab="Invader occupancy", xlab="", ylim=c(0,1))
 if(step2.plot2$x.label[i]=="Soil NO3") title(xlab=expression(paste("Soil ", NO[3]),mgp=c(2.2,1,0))) else title(xlab=as.character(step2.plot2$x.label[i]),mgp=c(2.2,1,0))
 
 if (step2.plot2$interaction[i]=="main"){
@@ -2527,6 +1848,88 @@ par(xpd=F)
 
 } # close plot for
 
+# COLONISATION ABUNDANCE:
+
+cab2b.plot2<-data.frame(data=nd.cab2b$df.name,x.label=c("Year","Soil NO3","Proportion perennial","Proportion legume","Height gap","Seed community wt mean","LDMC community wt mean"),x.variable=paste(nd.cab2b$xaxis.term,"_unsc",sep=""),interaction=nd.cab2b$interaction,x1.label=c(rep(NA,7)),x2.label=c(rep(NA,7)))
+
+quartz(title="",width=11.69,height=(8.27/3)*2, dpi=64, pointsize=19)
+par(mfrow=c(2,4),mar=c(4,4,1.5,1), pch=20, las=1, bty="l", mgp=c(3,1,0),oma=c(0,0,1,0))
+
+for (i in 1:length(cab2b.plot2[,1])){
+
+data.thisrun<-get(as.character(cab2b.plot2$data[i]))
+y.limx<-0.1
+
+plot.x<-data.thisrun[,as.character(cab2b.plot2$x.variable[i])]
+if(length(grep(".resp",colnames(data.thisrun)))>0) plot.y<-data.thisrun[,"fit.resp"] else plot.y<-data.thisrun[,"fit"]
+if(length(grep(".resp",colnames(data.thisrun)))>0) lci.thisrun<-data.thisrun[,"lci.resp"] else lci.thisrun<-data.thisrun[,"lci"]
+if(length(grep(".resp",colnames(data.thisrun)))>0) uci.thisrun<-data.thisrun[,"uci.resp"] else uci.thisrun<-data.thisrun[,"uci"]
+
+if (length(plot.x)==2){
+
+if(is.factor(plot.x)==T){
+plot(c(0,1), plot.y, type="n", ylab="Proportion cover", xlab="", ylim=c(0,y.limx), xaxt="n",xlim=c(-0.5,1.5))
+points(c(0,1), plot.y)
+arrows(c(0,1),lci.thisrun,c(0,1),uci.thisrun, angle=90, code=3, length=0.05)
+par(xpd=NA)
+axis(side=1, at=c(0,1), labels=c(as.character(cab2b.plot2$x1.label[i]),as.character(cab2b.plot2$x2.label[i])))
+par(xpd=F)
+} # close if factor
+
+if(is.factor(plot.x)==F){
+plot(plot.x, plot.y, type="n", ylab="Invader abundance", xlab="", ylim=c(0,y.limx), xaxt="n",xlim=c(-0.5,1.5))
+points(plot.x, plot.y)
+arrows(plot.x,lci.thisrun,plot.x,uci.thisrun, angle=90, code=3, length=0.05)
+par(xpd=NA)
+axis(side=1, at=plot.x, labels=c(as.character(cab2b.plot2$x1.label[i]),as.character(cab2b.plot2$x2.label[i])))
+par(xpd=F)
+} # close if not factor
+
+} # close if length 2
+
+if (length(plot.x)>2){
+
+plot(plot.x, plot.y, type="n", ylab="Invader abundance", xlab="", ylim=c(0,y.limx))
+par(xpd=NA)
+if(cab2b.plot2$x.label[i]=="Soil NO3") title(xlab=expression(paste("Soil ", NO[3])),mgp=c(2.35,1,0)) else if(cab2b.plot2$x.label[i]=="Proportion perennial") title(xlab="Proportion perennial\nin community",mgp=c(3.2,1,0)) else if(cab2b.plot2$x.label[i]=="Proportion legume") title(xlab="Proportion legume\nin community",mgp=c(3.2,1,0)) else title(xlab=as.character(cab2b.plot2$x.label[i]),mgp=c(2.2,1,0))
+par(xpd=F)
+
+# ; if(cab2b.plot2$x.label[i]=="Proportion perennial") title(xlab=expression(paste("xx ", NO[3])),mgp=c(2.2,1,0))
+
+if (cab2b.plot2$interaction[i]=="main"){
+pg.ci(as.character(cab2b.plot2$x.variable[i]),as.character(cab2b.plot2$data[i]),colour=rgb(0,0,0,0.1))
+lines(plot.x, plot.y)
+} # close if main
+
+if (cab2b.plot2$interaction[i]=="int"){
+pg.ci(as.character(cab2b.plot2$x.variable[i]),as.character(cab2b.plot2$data[i]),x.subset=as.character(cab2b.plot2$x.subset[i]),colour=rgb(0,0,0,0.1))
+
+sub1<-unique(data.thisrun[,as.character(cab2b.plot2$x.subset[i])])[1]
+sub2<-unique(data.thisrun[,as.character(cab2b.plot2$x.subset[i])])[2]
+
+linex.lev1<-data.thisrun[,as.character(cab2b.plot2$x.variable[i])][data.thisrun[,as.character(cab2b.plot2$x.subset[i])]==sub1]
+liney.lev1<-data.thisrun$fit[data.thisrun[,as.character(cab2b.plot2$x.subset[i])]==sub1]
+
+lines(linex.lev1, liney.lev1, lty=1)
+
+linex.lev2<-data.thisrun[,as.character(cab2b.plot2$x.variable[i])][data.thisrun[,as.character(cab2b.plot2$x.subset[i])]==sub2]
+liney.lev2<-data.thisrun$fit[data.thisrun[,as.character(cab2b.plot2$x.subset[i])]==sub2]
+
+lines(linex.lev2, liney.lev2, lty=2)
+
+par(xpd=NA)
+legend("topleft",legend=c(as.character(cab2b.plot2$x1.label[i]),as.character(cab2b.plot2$x2.label[i])),lty=c(1,2),bty="n")
+par(xpd=F)
+
+} # close if interaction
+
+} # close if > 2 levels
+
+par(xpd=NA)
+text(par("usr")[1],par("usr")[4]+0.015,paste("(",letters[i+12],")",sep=""),cex=1.2)
+par(xpd=F)
+
+} # close plot for
 
 # SPREAD PROBABILITY:
 
@@ -2543,7 +1946,7 @@ plot.y<-data.thisrun[,"fit"]
 
 if (length(plot.x)==2){
 
-plot(plot.x, plot.y, type="n", ylab="Spread probability", xlab="", ylim=c(0,1), xaxt="n",xlim=c(-0.5,1.5))
+plot(plot.x, plot.y, type="n", ylab="Invader occupancy", xlab="", ylim=c(0,1), xaxt="n",xlim=c(-0.5,1.5))
 points(plot.x, plot.y)
 arrows(plot.x,data.thisrun$lci,plot.x,data.thisrun$uci, angle=90, code=3, length=0.05)
 axis(side=1, at=plot.x, labels=c(as.character(step2bspr.plot2$x1.label[i]),as.character(step2bspr.plot2$x2.label[i])))
@@ -2551,7 +1954,7 @@ axis(side=1, at=plot.x, labels=c(as.character(step2bspr.plot2$x1.label[i]),as.ch
 
 if (length(plot.x)>2){
 
-plot(plot.x, plot.y, type="n", ylab="Spread probability", xlab="", ylim=c(0,1))
+plot(plot.x, plot.y, type="n", ylab="Invader occupancy", xlab="", ylim=c(0,1))
 title(xlab=as.character(step2bspr.plot2$x.label[i]),mgp=c(2.2,1,0))
 
 if (step2bspr.plot2$interaction[i]=="main"){
@@ -2589,77 +1992,59 @@ par(xpd=F)
 
 } # close plot for
 
-# COLONISATION ABUNDANCE:
-
-cab2b.plot2<-data.frame(data=nd.cab2b$df.name,x.label=c("Year","Soil NO3","Proportion perennial","Proportion legume","Height gap","Seed community wt mean","LDMC community wt mean"),x.variable=paste(nd.cab2b$xaxis.term,"_unsc",sep=""),interaction=nd.cab2b$interaction,x1.label=c(rep(NA,7)),x2.label=c(rep(NA,7)))
+# SPREAD ABUNDANCE
 
 quartz(title="",width=11.69,height=(8.27/3)*2, dpi=64, pointsize=19)
-par(mfrow=c(2,4),mar=c(4,4,1.5,1), pch=20, las=1, bty="l", mgp=c(3,1,0),oma=c(0,0,1,0))
+par(mfrow=c(2,4),mar=c(4,4,1.5,1), pch=20, las=1, bty="l", mgp=c(2.7,1,0),oma=c(0,0,1,0))
+ylim_sprab<-c(0.06,0.2,rep(0.06,4))
+let_ofs<-c(0.01,0.025,rep(0.01,4))
 
-for (i in 1:length(cab2b.plot2[,1])){
+for (i in 1:length(step2sab.plot[,1])){
 
-data.thisrun<-get(as.character(cab2b.plot2$data[i]))
-y.limx<-0.2
-
-plot.x<-data.thisrun[,as.character(cab2b.plot2$x.variable[i])]
+data.thisrun<-get(as.character(step2sab.plot$data[i]))
+plot.x<-data.thisrun[,as.character(step2sab.plot$x.variable[i])]
 if(length(grep(".resp",colnames(data.thisrun)))>0) plot.y<-data.thisrun[,"fit.resp"] else plot.y<-data.thisrun[,"fit"]
 if(length(grep(".resp",colnames(data.thisrun)))>0) lci.thisrun<-data.thisrun[,"lci.resp"] else lci.thisrun<-data.thisrun[,"lci"]
 if(length(grep(".resp",colnames(data.thisrun)))>0) uci.thisrun<-data.thisrun[,"uci.resp"] else uci.thisrun<-data.thisrun[,"uci"]
 
+y.limx<-ylim_sprab[i]
+
 if (length(plot.x)==2){
 
-if(is.factor(plot.x)==T){
-plot(c(0,1), plot.y, type="n", ylab="Proportion cover", xlab="", ylim=c(min(lci.thisrun),y.limx), xaxt="n",xlim=c(-0.5,1.5))
-points(c(0,1), plot.y)
-arrows(c(0,1),lci.thisrun,c(0,1),uci.thisrun, angle=90, code=3, length=0.05)
-par(xpd=NA)
-axis(side=1, at=c(0,1), labels=c(as.character(cab2b.plot2$x1.label[i]),as.character(cab2b.plot2$x2.label[i])))
-par(xpd=F)
-} # close if factor
-
-if(is.factor(plot.x)==F){
-plot(plot.x, plot.y, type="n", ylab="Invader cover", xlab="", ylim=c(min(lci.thisrun),y.limx), xaxt="n",xlim=c(-0.5,1.5))
+plot(plot.x, plot.y, type="n", ylab="Invader abundance", xlab="", ylim=c(0,y.limx), xaxt="n",xlim=c(-0.5,1.5))
 points(plot.x, plot.y)
-arrows(plot.x,lci.thisrun,plot.x,uci.thisrun, angle=90, code=3, length=0.05)
-par(xpd=NA)
-axis(side=1, at=plot.x, labels=c(as.character(cab2b.plot2$x1.label[i]),as.character(cab2b.plot2$x2.label[i])))
-par(xpd=F)
-} # close if not factor
-
-} # close if length 2
+arrows(plot.x,data.thisrun$lci,plot.x,data.thisrun$uci, angle=90, code=3, length=0.05)
+axis(side=1, at=plot.x, labels=c(as.character(step2sab.plot$x1.label[i]),as.character(step2sab.plot$x2.label[i])))
+}
 
 if (length(plot.x)>2){
 
-plot(plot.x, plot.y, type="n", ylab="Invader cover", xlab="", ylim=c(min(lci.thisrun),y.limx))
-par(xpd=NA)
-if(cab2b.plot2$x.label[i]=="Soil NO3") title(xlab=expression(paste("Soil ", NO[3])),mgp=c(2.35,1,0)) else if(cab2b.plot2$x.label[i]=="Proportion perennial") title(xlab="Proportion perennial\nin community",mgp=c(3.2,1,0)) else if(cab2b.plot2$x.label[i]=="Proportion legume") title(xlab="Proportion legume\nin community",mgp=c(3.2,1,0)) else title(xlab=as.character(cab2b.plot2$x.label[i]),mgp=c(2.2,1,0))
-par(xpd=F)
+plot(plot.x, plot.y, type="n", ylab="Invader abundance", xlab="", ylim=c(0,y.limx))
+title(xlab=as.character(step2sab.plot$x.label[i]),mgp=c(2.2,1,0))
 
-# ; if(cab2b.plot2$x.label[i]=="Proportion perennial") title(xlab=expression(paste("xx ", NO[3])),mgp=c(2.2,1,0))
-
-if (cab2b.plot2$interaction[i]=="main"){
-pg.ci(as.character(cab2b.plot2$x.variable[i]),as.character(cab2b.plot2$data[i]),colour=rgb(0,0,0,0.1))
+if (step2sab.plot$interaction[i]=="main"){
+pg.ci(as.character(step2sab.plot$x.variable[i]),as.character(step2sab.plot$data[i]),colour=rgb(0,0,0,0.1))
 lines(plot.x, plot.y)
 } # close if main
 
-if (cab2b.plot2$interaction[i]=="int"){
-pg.ci(as.character(cab2b.plot2$x.variable[i]),as.character(cab2b.plot2$data[i]),x.subset=as.character(cab2b.plot2$x.subset[i]),colour=rgb(0,0,0,0.1))
+if (step2sab.plot$interaction[i]=="int"){
+pg.ci(as.character(step2sab.plot$x.variable[i]),as.character(step2sab.plot$data[i]),x.subset=as.character(step2sab.plot$x.subset[i]),colour=rgb(0,0,0,0.1))
 
-sub1<-unique(data.thisrun[,as.character(cab2b.plot2$x.subset[i])])[1]
-sub2<-unique(data.thisrun[,as.character(cab2b.plot2$x.subset[i])])[2]
+sub1<-unique(data.thisrun[,as.character(step2sab.plot$x.subset[i])])[1]
+sub2<-unique(data.thisrun[,as.character(step2sab.plot$x.subset[i])])[2]
 
-linex.lev1<-data.thisrun[,as.character(cab2b.plot2$x.variable[i])][data.thisrun[,as.character(cab2b.plot2$x.subset[i])]==sub1]
-liney.lev1<-data.thisrun$fit[data.thisrun[,as.character(cab2b.plot2$x.subset[i])]==sub1]
+linex.lev1<-data.thisrun[,as.character(step2sab.plot$x.variable[i])][data.thisrun[,as.character(step2sab.plot$x.subset[i])]==sub1]
+liney.lev1<-data.thisrun$fit.resp[data.thisrun[,as.character(step2sab.plot$x.subset[i])]==sub1]
 
 lines(linex.lev1, liney.lev1, lty=1)
 
-linex.lev2<-data.thisrun[,as.character(cab2b.plot2$x.variable[i])][data.thisrun[,as.character(cab2b.plot2$x.subset[i])]==sub2]
-liney.lev2<-data.thisrun$fit[data.thisrun[,as.character(cab2b.plot2$x.subset[i])]==sub2]
+linex.lev2<-data.thisrun[,as.character(step2sab.plot$x.variable[i])][data.thisrun[,as.character(step2sab.plot$x.subset[i])]==sub2]
+liney.lev2<-data.thisrun$fit.resp[data.thisrun[,as.character(step2sab.plot$x.subset[i])]==sub2]
 
 lines(linex.lev2, liney.lev2, lty=2)
 
 par(xpd=NA)
-legend("topleft",legend=c(as.character(cab2b.plot2$x1.label[i]),as.character(cab2b.plot2$x2.label[i])),lty=c(1,2),bty="n")
+legend(par("usr")[1],0.068,legend=c(as.character(step2sab.plot$x1.label[i]),as.character(step2sab.plot$x2.label[i])),lty=c(1,2),bty="n",cex=0.8)
 par(xpd=F)
 
 } # close if interaction
@@ -2667,25 +2052,12 @@ par(xpd=F)
 } # close if > 2 levels
 
 par(xpd=NA)
-text(par("usr")[1],par("usr")[4]+0.03,paste("(",letters[i],")",sep=""),cex=1.2)
+text(par("usr")[1],par("usr")[4]+let_ofs[i],paste("(",letters[i+7],")",sep=""),cex=1.2)
 par(xpd=F)
 
 } # close plot for
 
 } # close plots for paper
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
