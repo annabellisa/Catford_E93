@@ -10,7 +10,7 @@ There are three files:
 
 2. e93_S1_data_setup.R Script for processing species, trait and environmental data from E93 and related experiments. 
 
-3. e93_S2_analysis.R Fitting models, model selection estimating parameters from fitted models and plotting estimates.
+3. e93_S2_analysis.R Fitting models, model selection, estimating parameters from fitted models and plotting estimates.
 
 ## Authors
 
