@@ -6,7 +6,7 @@ R scripts for processing and analysing data from the Cedar Creek Ecosystem Scien
 
 There are three files:
 
-1. e93_S0_function_library.R Contains all functions used in processing and analysis. 
+1. e93_S0_function_library.R Contains all functions used in processing and analysis. Some have 2 versions because both were used at different points in the analysis. 
 
 2. e93_S1_data_setup.R Script for processing species, trait and environmental data from E93 and related experiments. 
 
