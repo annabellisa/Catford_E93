@@ -281,7 +281,7 @@ arrows(0,0,0,50,code=0)
 axis(side=2, at=1:1:length(coef.table[,1]), labels=rev(as.character(coef.table$term)),las=1, cex.axis=0.8)
 }
 
-# Generate new data and predictions (calls on pred()). V2 includes option to change min and max for numeric x numeric interactions.
+# Generate new data and predictions (depends on pred()). V2 includes option to change min and max for numeric x numeric interactions.
 estimates.nd.V2<-function(model,xaxis.term, int.term=NULL,modelled.data, unscaled.data,minmax=NULL){
 
 # Set these for testing:
@@ -442,7 +442,7 @@ return(term.pr)
 
 } # close estimtes.nd2
 
-# Generate new data and predictions (calls on pred())
+# Generate new data and predictions (depends on pred())
 estimates.nd<-function(model,xaxis.term, int.term=NULL,modelled.data, unscaled.data){
 
 # Set these for testing:
