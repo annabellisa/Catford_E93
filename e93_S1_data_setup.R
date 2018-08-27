@@ -10,9 +10,6 @@ source("/Users/annabelsmith/Documents/01_Current/PROJECTS/03_CATFORD_invasion_tr
 
 load("e93_wksp_data")
 
-dir()
-save.image("e93_wksp_data")
-
 ######################################
 #       	PROCESS RAW DATA		 #
 ######################################
@@ -981,12 +978,6 @@ invader_mean<-tr.data[,grep(trait.thisrun,colnames(tr.data))]
 
 if (nn_distance > invader_mean) colonise[i,which(colnames(colonise)==paste(trait.thisrun,"gap",sep="_"))]<-nn$tr[target.ind+1] else colonise[i,which(colnames(colonise)==paste(trait.thisrun,"gap",sep="_"))]<-(nn$tr[target.ind+1]-nn$tr[target.ind])*2
 
-# This is the "original" method. Paraphrased from JC email (21/3/2016): Re gap size, use the same approach for smallest and largest, ie set the gap size for smallest and largest invader as full range. Gap sizes should always be positive. 
-# colonise[i,which(colnames(colonise)==paste(trait.thisrun,"gap",sep="_"))]<-max(range(nn$tr,na.rm=T))-min(range(nn$tr,na.rm=T))
-
-# GAP (not using this method as we don't have replicates for all species), from JC 6th Feb 2017: we'll use constants for max and min values for the four traits - the same constants regardless of species, subplot or time in question. These will be indemnified by taking the min and max values from all replicates across all species used in the analysis (with the exception of seed mass for the woody spp). 
-# colonise[i,which(colnames(colonise)==paste(trait.thisrun,"gap",sep="_"))]<-trait_extr$smallest[trait_extr$trait==trait.thisrun]+nn$tr[target.ind+1]
-
 } # close if smallest
 
 colonise[(i-1):(i+1),]
@@ -1004,12 +995,6 @@ colonise[i,which(colnames(colonise)==paste(trait.thisrun,"relNN",sep="_"))]<-nn$
 # gap = NN distance*2
 
 colonise[i,which(colnames(colonise)==paste(trait.thisrun,"gap",sep="_"))]<-(nn$tr[target.ind]-nn$tr[target.ind-1])*2
-
-# This is the "original" method. Paraphrased from JC email (21/3/2016): Re gap size, use the same approach for smallest and largest, ie set the gap size for smallest and largest invader as full range. Gap sizes should always be positive. 
-# colonise[i,which(colnames(colonise)==paste(trait.thisrun,"gap",sep="_"))]<-max(range(nn$tr,na.rm=T))-min(range(nn$tr,na.rm=T))
-
-# GAP (as above for smallest)
-# colonise[i,which(colnames(colonise)==paste(trait.thisrun,"gap",sep="_"))]<-trait_extr$largest[trait_extr$trait==trait.thisrun]+nn$tr[target.ind-1]
 
 } # close if largest
 
@@ -1055,16 +1040,6 @@ colonise$sla_absFD<-abs(colonise$sla_relFD)
 # check:
 colonise[sample(1:length(colonise[,1]),4),]
 # head(colonise[which(colonise$sp=="Nep_cat"),])
-
-# par(mfrow=c(2,2),mar=c(2,2,2,0))
-# hist(colonise$hgt_gap,xlab="",ylab="",main="height")
-# hist(colonise$seed_gap,xlab="",ylab="",main="seed")
-# hist(colonise$ldmc_gap,xlab="",ylab="",main="LDMC")
-# hist(colonise$sla_gap,xlab="",ylab="",main="SLA")
-# range(colonise$hgt_gap,na.rm=T)
-# range(colonise$seed_gap,na.rm=T)
-# range(colonise$ldmc_gap,na.rm=T)
-# range(colonise$sla_gap,na.rm=T)
 
 } # close functional distance
 
@@ -1657,9 +1632,6 @@ invader_mean<-tr.data[,grep(trait.thisrun,colnames(tr.data))]
 
 if (nn_distance > invader_mean) spread[i,which(colnames(spread)==paste(trait.thisrun,"gap",sep="_"))]<-nn$tr[target.ind+1] else spread[i,which(colnames(spread)==paste(trait.thisrun,"gap",sep="_"))]<-(nn$tr[target.ind+1]-nn$tr[target.ind])*2
 
-# This is the "original" method. Paraphrased from JC email (21/3/2016): Re gap size, use the same approach for smallest and largest, ie set the gap size for smallest and largest invader as full range. Gap sizes should always be positive. 
-# spread[i,which(colnames(spread)==paste(trait.thisrun,"gap",sep="_"))]<-max(range(nn$tr,na.rm=T))-min(range(nn$tr,na.rm=T))
-
 } # close if smallest
 
 spread[(i-1):(i+1),]
@@ -1677,9 +1649,6 @@ spread[i,which(colnames(spread)==paste(trait.thisrun,"relNN",sep="_"))]<-nn$tr[t
 # gap = NN distance*2
 
 spread[i,which(colnames(spread)==paste(trait.thisrun,"gap",sep="_"))]<-(nn$tr[target.ind]-nn$tr[target.ind-1])*2
-
-# This is the "original" method. Paraphrased from JC email (21/3/2016): Re gap size, use the same approach for smallest and largest, ie set the gap size for smallest and largest invader as full range. Gap sizes should always be positive. 
-# spread[i,which(colnames(spread)==paste(trait.thisrun,"gap",sep="_"))]<-max(range(nn$tr,na.rm=T))-min(range(nn$tr,na.rm=T))
 
 } # close if largest
 
@@ -1724,16 +1693,6 @@ spread$sla_absFD<-abs(spread$sla_relFD)
 
 # check:
 check.rows(spread,3)
-
-# par(mfrow=c(2,2),mar=c(2,2,2,0))
-# hist(spread$hgt_gap,xlab="",ylab="",main="height")
-# hist(spread$seed_gap,xlab="",ylab="",main="seed")
-# hist(spread$ldmc_gap,xlab="",ylab="",main="LDMC")
-# hist(spread$sla_gap,xlab="",ylab="",main="SLA")
-range(colonise$hgt_gap,na.rm=T)
-range(colonise$seed_gap,na.rm=T)
-range(colonise$ldmc_gap,na.rm=T)
-range(colonise$sla_gap,na.rm=T)
 
 } # close functional distance
 
@@ -2170,9 +2129,6 @@ invader_mean<-tr.data[,grep(trait.thisrun,colnames(tr.data))]
 
 if (nn_distance > invader_mean) colab[i,which(colnames(colab)==paste(trait.thisrun,"gap",sep="_"))]<-nn$tr[target.ind+1] else colab[i,which(colnames(colab)==paste(trait.thisrun,"gap",sep="_"))]<-(nn$tr[target.ind+1]-nn$tr[target.ind])*2
 
-# This is the "original" method. Paraphrased from JC email (21/3/2016): Re gap size, use the same approach for smallest and largest, ie set the gap size for smallest and largest invader as full range. Gap sizes should always be positive. 
-# colab[i,which(colnames(colab)==paste(trait.thisrun,"gap",sep="_"))]<-max(range(nn$tr,na.rm=T))-min(range(nn$tr,na.rm=T))
-
 } # close if smallest
 
 colab[(i-1):(i+1),]
@@ -2191,9 +2147,6 @@ colab[i,which(colnames(colab)==paste(trait.thisrun,"relNN",sep="_"))]<-nn$tr[tar
 # gap = NN distance*2
 
 colab[i,which(colnames(colab)==paste(trait.thisrun,"gap",sep="_"))]<-(nn$tr[target.ind]-nn$tr[target.ind-1])*2
-
-# This is the "original" method. Paraphrased from JC email (21/3/2016): Re gap size, use the same approach for smallest and largest, ie set the gap size for smallest and largest invader as full range. Gap sizes should always be positive. 
-# colab[i,which(colnames(colab)==paste(trait.thisrun,"gap",sep="_"))]<-max(range(nn$tr,na.rm=T))-min(range(nn$tr,na.rm=T))
 
 } # close if largest
 
@@ -2238,16 +2191,6 @@ colab$sla_absFD<-abs(colab$sla_relFD)
 
 # check:
 check.rows(colab,3)
-
-# # par(mfrow=c(2,2),mar=c(2,2,2,0))
-# hist(colonise$hgt_gap,xlab="",ylab="",main="height")
-# hist(colonise$seed_gap,xlab="",ylab="",main="seed")
-# hist(colonise$ldmc_gap,xlab="",ylab="",main="LDMC")
-# hist(colonise$sla_gap,xlab="",ylab="",main="SLA")
-# range(colonise$hgt_gap,na.rm=T)
-# range(colonise$seed_gap,na.rm=T)
-# range(colonise$ldmc_gap,na.rm=T)
-# range(colonise$sla_gap,na.rm=T)
 
 } # close functional distance
 
