@@ -20,7 +20,7 @@ Annabel Smith and Jane Catford, except where indicated within the script.
 
 Catford JA, Smith AL, Wragg P, Clark AT, Kosmala M, Cavender-Bares J, Reich PB, Tilman D. submitted 2018. Traits linked with species invasiveness and community invasibility vary with time, stage and metric of invasion in a long-term grassland experiment. 
 
-
+## License
 
 Catford E93 by Annabel Smith & Jane Catford is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.
 Based on a work at https://github.com/annabellisa/Catford_E93.
