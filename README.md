@@ -22,4 +22,5 @@ Catford JA, Smith AL, Wragg P, Clark AT, Kosmala M, Cavender-Bares J, Reich PB, 
 
 
 
-<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc/4.0
+Catford E93 by Annabel Smith & Jane Catford is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.
+Based on a work at https://github.com/annabellisa/Catford_E93.
