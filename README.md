@@ -18,7 +18,7 @@ Annabel Smith and Jane Catford, except where indicated within the script.
 
 ## Manuscript
 
-Catford JA, Smith AL, Wragg P, Clark AT, Kosmala M, Cavender-Bares J, Reich PB, Tilman D. submitted 2018. Traits linked with species invasiveness and community invasibility vary with time, stage and metric of invasion in a long-term grassland experiment. 
+Catford JA, Smith AL, Wragg P, Clark AT, Kosmala M, Cavender-Bares J, Reich PB, Tilman D (2019). Traits linked with species invasiveness and community invasibility vary with time, stage and indicator of invasion in a long-term grassland experiment. Ecology Letters, doi.org/10.1111/ele.13220. 
 
 ## License
 
